@@ -29,10 +29,11 @@ Make sure you have [Node.js](https://nodejs.org/) (v18+) installed.
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/echoes-poetry.git
+git clone https://github.com/amritanshu-kishor/echoes-of-what-we-never-said.git
 
 # Navigate to the project directory
-cd echoes-poetry
+cd echoes-of-what-we-never-said
+
 
 # Install dependencies
 npm install
