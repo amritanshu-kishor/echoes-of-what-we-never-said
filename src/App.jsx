@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { POEMS, EMOTIONAL_STAGES } from './data/poems';
 import ParticleBackground from './components/ParticleBackground';
@@ -8,6 +8,7 @@ import PoemViewer from './components/PoemViewer';
 import JourneyTimeline from './components/JourneyTimeline';
 import HiddenStory from './components/HiddenStory';
 import FinalScreen from './components/FinalScreen';
+import { resetScroll } from './utils/scroll';
 
 export default function App() {
   const [viewState, setViewState] = useState('landing'); // 'landing' | 'reading' | 'final'
@@ -17,7 +18,10 @@ export default function App() {
   const [hasUnlockedStory, setHasUnlockedStory] = useState(false);
 
   // Smooth mouse position tracking for tilt & parallax
-  const [mousePos, setMousePos] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  const [mousePos, setMousePos] = useState(() => ({
+    x: typeof window !== 'undefined' ? window.innerWidth / 2 : 600,
+    y: typeof window !== 'undefined' ? window.innerHeight / 2 : 400,
+  }));
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -29,8 +33,46 @@ export default function App() {
 
   // Force scroll position to top whenever view or active poem index changes
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    resetScroll();
   }, [currentPoemIndex, viewState]);
+
+  // View Navigation Handlers
+  const handleBeginJourney = useCallback(() => {
+    resetScroll();
+    setCurrentPoemIndex(0);
+    setViewState('reading');
+  }, []);
+
+  const handleNext = useCallback(() => {
+    resetScroll();
+    if (currentPoemIndex < POEMS.length - 1) {
+      setCurrentPoemIndex((prev) => prev + 1);
+    } else {
+      setHasUnlockedStory(true);
+      setViewState('final');
+    }
+  }, [currentPoemIndex]);
+
+  const handlePrev = useCallback(() => {
+    resetScroll();
+    if (currentPoemIndex > 0) {
+      setCurrentPoemIndex((prev) => prev - 1);
+    } else {
+      setViewState('landing');
+    }
+  }, [currentPoemIndex]);
+
+  const handleSelectPoem = useCallback((index) => {
+    resetScroll();
+    setCurrentPoemIndex(index);
+    setViewState('reading');
+  }, []);
+
+  const handleRestart = useCallback(() => {
+    resetScroll();
+    setCurrentPoemIndex(0);
+    setViewState('landing');
+  }, []);
 
   // Keyboard Navigation
   useEffect(() => {
@@ -44,7 +86,7 @@ export default function App() {
       }
 
       if (viewState === 'reading') {
-        if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        if (e.key === 'ArrowRight' || e.key === 'PageDown') {
           e.preventDefault();
           handleNext();
         } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
@@ -56,45 +98,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [viewState, currentPoemIndex, showTimeline, showHiddenStory]);
-
-  // View Navigation Handlers
-  const handleBeginJourney = () => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    setCurrentPoemIndex(0);
-    setViewState('reading');
-  };
-
-  const handleNext = () => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    if (currentPoemIndex < POEMS.length - 1) {
-      setCurrentPoemIndex((prev) => prev + 1);
-    } else {
-      setHasUnlockedStory(true);
-      setViewState('final');
-    }
-  };
-
-  const handlePrev = () => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    if (currentPoemIndex > 0) {
-      setCurrentPoemIndex((prev) => prev - 1);
-    } else {
-      setViewState('landing');
-    }
-  };
-
-  const handleSelectPoem = (index) => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    setCurrentPoemIndex(index);
-    setViewState('reading');
-  };
-
-  const handleRestart = () => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    setCurrentPoemIndex(0);
-    setViewState('landing');
-  };
+  }, [viewState, showTimeline, showHiddenStory, handleNext, handlePrev]);
 
   const currentPoem = POEMS[currentPoemIndex];
   const currentStage = EMOTIONAL_STAGES.find((s) => s.id === currentPoem?.stage);
@@ -114,7 +118,7 @@ export default function App() {
           totalPoems={POEMS.length}
           currentStage={currentStage}
           onGoHome={() => {
-            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            resetScroll();
             setViewState('landing');
           }}
           onOpenTimeline={() => setShowTimeline(true)}
@@ -124,7 +128,7 @@ export default function App() {
       )}
 
       {/* Main Screen Transition Area */}
-      <main className="relative z-20 min-h-screen">
+      <main className="relative z-20 min-h-screen pointer-events-auto">
         <AnimatePresence mode="wait">
           {viewState === 'landing' && (
             <motion.div
@@ -194,7 +198,7 @@ export default function App() {
           <HiddenStory
             onClose={() => setShowHiddenStory(false)}
             onRestart={() => {
-              window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+              resetScroll();
               setViewState('reading');
             }}
           />

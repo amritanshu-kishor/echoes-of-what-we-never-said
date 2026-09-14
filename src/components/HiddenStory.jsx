@@ -1,9 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { X, Sparkles, Heart, BookOpen, ArrowRight } from 'lucide-react';
+import { X, Sparkles, BookOpen } from 'lucide-react';
 import { HIDDEN_STORY_NARRATIVE, EMOTIONAL_STAGES } from '../data/poems';
+import { resetScroll } from '../utils/scroll';
 
 export default function HiddenStory({ onClose, onRestart }) {
+  const handleRevisit = () => {
+    resetScroll();
+    onClose();
+    if (onRestart) onRestart();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -24,8 +31,10 @@ export default function HiddenStory({ onClose, onRestart }) {
           <span>The Overarching Narrative</span>
         </div>
         <button
+          type="button"
           onClick={onClose}
-          className="p-3 rounded-full glass-panel text-stone-400 hover:text-white transition-all duration-300 hover:rotate-90 border-white/10"
+          aria-label="Close hidden story"
+          className="p-3 rounded-full glass-panel text-stone-400 hover:text-white transition-all duration-300 hover:rotate-90 border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -93,11 +102,9 @@ export default function HiddenStory({ onClose, onRestart }) {
           className="mt-12 flex flex-col sm:flex-row items-center gap-4"
         >
           <button
-            onClick={() => {
-              onClose();
-              if (onRestart) onRestart();
-            }}
-            className="px-8 py-4 rounded-full bg-[#f4f1ea] text-[#0a0a0c] font-sans-ui font-medium text-xs uppercase tracking-widest transition-all duration-300 hover:shadow-[0_0_30px_rgba(244,241,234,0.3)] hover:scale-[1.03] flex items-center gap-3"
+            type="button"
+            onClick={handleRevisit}
+            className="px-8 py-4 rounded-full bg-[#f4f1ea] text-[#0a0a0c] font-sans-ui font-medium text-xs uppercase tracking-widest transition-all duration-300 hover:shadow-[0_0_30px_rgba(244,241,234,0.3)] hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] cursor-pointer flex items-center gap-3"
           >
             <BookOpen className="w-4 h-4" />
             <span>Revisit the Poems</span>
@@ -107,7 +114,7 @@ export default function HiddenStory({ onClose, onRestart }) {
 
       {/* Footer */}
       <div className="relative z-10 max-w-4xl w-full mx-auto text-center pt-8 border-t border-white/10 text-xs font-sans-ui text-stone-500 uppercase tracking-widest">
-        Echoes of What We Never Said &bull; XXI Poems
+        Echoes of What We Never Said &bull; XX Poems
       </div>
     </motion.div>
   );

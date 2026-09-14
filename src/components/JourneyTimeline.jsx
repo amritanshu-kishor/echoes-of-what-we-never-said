@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, ArrowRight, Compass } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { X, ArrowRight, Compass } from 'lucide-react';
 import { EMOTIONAL_STAGES, POEMS } from '../data/poems';
+import { resetScroll } from '../utils/scroll';
 
 export default function JourneyTimeline({ onClose, onSelectPoem, currentPoemId }) {
-  const [hoveredPoem, setHoveredPoem] = useState(null);
   const [activeStageId, setActiveStageId] = useState('all');
 
   const filteredPoems =
     activeStageId === 'all'
       ? POEMS
       : POEMS.filter((p) => p.stage === activeStageId);
+
+  const handleSelect = (index) => {
+    resetScroll();
+    onSelectPoem(index);
+    onClose();
+  };
 
   return (
     <motion.div
@@ -42,8 +48,10 @@ export default function JourneyTimeline({ onClose, onSelectPoem, currentPoemId }
         </div>
 
         <button
+          type="button"
           onClick={onClose}
-          className="p-3 rounded-full glass-panel text-stone-400 hover:text-white transition-all duration-300 hover:rotate-90 border-white/10"
+          aria-label="Close timeline"
+          className="p-3 rounded-full glass-panel text-stone-400 hover:text-white transition-all duration-300 hover:rotate-90 border-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -53,8 +61,9 @@ export default function JourneyTimeline({ onClose, onSelectPoem, currentPoemId }
       <div className="relative z-10 max-w-7xl w-full mx-auto mb-10 overflow-x-auto pb-4 scrollbar-none">
         <div className="flex items-center gap-2 sm:gap-3 min-w-max">
           <button
+            type="button"
             onClick={() => setActiveStageId('all')}
-            className={`px-5 py-2.5 rounded-full text-xs font-sans-ui uppercase tracking-widest transition-all duration-300 border ${
+            className={`px-5 py-2.5 rounded-full text-xs font-sans-ui uppercase tracking-widest transition-all duration-300 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] cursor-pointer ${
               activeStageId === 'all'
                 ? 'bg-[#f4f1ea] text-[#0a0a0c] border-[#f4f1ea] font-medium shadow-[0_0_20px_rgba(244,241,234,0.2)]'
                 : 'glass-panel text-stone-400 border-white/10 hover:text-white'
@@ -67,9 +76,10 @@ export default function JourneyTimeline({ onClose, onSelectPoem, currentPoemId }
             const isActive = activeStageId === stage.id;
             return (
               <button
+                type="button"
                 key={stage.id}
                 onClick={() => setActiveStageId(stage.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-sans-ui uppercase tracking-widest transition-all duration-300 border ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-sans-ui uppercase tracking-widest transition-all duration-300 border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] cursor-pointer ${
                   isActive
                     ? 'bg-white/15 text-white border-[#c5a059] box-gold-glow'
                     : 'glass-panel text-stone-400 border-white/10 hover:text-stone-200'
@@ -100,14 +110,16 @@ export default function JourneyTimeline({ onClose, onSelectPoem, currentPoemId }
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: idx * 0.04 }}
-                onMouseEnter={() => setHoveredPoem(poem)}
-                onMouseLeave={() => setHoveredPoem(null)}
-                onClick={() => {
-                  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-                  onSelectPoem(poem.id - 1);
-                  onClose();
+                onClick={() => handleSelect(poem.id - 1)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleSelect(poem.id - 1);
+                  }
                 }}
-                className={`group relative p-6 rounded-2xl cursor-pointer transition-all duration-500 overflow-hidden border ${
+                className={`group relative p-6 rounded-2xl cursor-pointer transition-all duration-500 overflow-hidden border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] ${
                   isSelected
                     ? 'bg-[#c5a059]/15 border-[#c5a059]/60 box-gold-glow'
                     : 'glass-card hover:border-[#c5a059]/40 hover:bg-white/[0.06]'

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Compass, Sparkles } from 'lucide-react';
 import { EMOTIONAL_STAGES } from '../data/poems';
+import { resetScroll } from '../utils/scroll';
 
 export default function PoemViewer({
   poem,
@@ -12,19 +13,35 @@ export default function PoemViewer({
   onOpenTimeline,
   mousePos
 }) {
-  const [imageLoaded, setImageLoaded] = useState(false);
-
   // Mouse tilt perspective effect
-  const tiltX = (mousePos.y - window.innerHeight / 2) * 0.012;
-  const tiltY = (mousePos.x - window.innerWidth / 2) * -0.012;
+  const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1200;
+  const windowHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+  const mouseX = mousePos?.x ?? windowWidth / 2;
+  const mouseY = mousePos?.y ?? windowHeight / 2;
+
+  const tiltX = (mouseY - windowHeight / 2) * 0.012;
+  const tiltY = (mouseX - windowWidth / 2) * -0.012;
 
   const currentStage = EMOTIONAL_STAGES.find((s) => s.id === poem.stage);
 
-  // Guarantee instant scroll-to-top on poem change
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-    setImageLoaded(false);
+  // Guarantee instant scroll-to-top on poem change (before & after render)
+  useLayoutEffect(() => {
+    resetScroll();
   }, [poem.id]);
+
+  useEffect(() => {
+    resetScroll();
+  }, [poem.id]);
+
+  const handlePrevClick = () => {
+    resetScroll();
+    onPrev();
+  };
+
+  const handleNextClick = () => {
+    resetScroll();
+    onNext();
+  };
 
   return (
     <div className="relative min-h-screen w-full flex flex-col justify-between items-center px-4 sm:px-8 py-20 z-20 overflow-hidden select-text">
@@ -155,15 +172,13 @@ export default function PoemViewer({
       <div className="relative z-30 w-full max-w-4xl flex items-center justify-between pointer-events-auto pt-4">
         {/* Previous Poem Button */}
         <button
-          onClick={() => {
-            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-            onPrev();
-          }}
+          type="button"
+          onClick={handlePrevClick}
           disabled={currentIndex === 0}
-          className={`group flex items-center gap-3 px-5 py-3 rounded-full glass-panel transition-all duration-300 font-sans-ui text-xs uppercase tracking-widest ${
+          className={`group flex items-center gap-3 px-5 py-3 rounded-full glass-panel transition-all duration-300 font-sans-ui text-xs uppercase tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] ${
             currentIndex === 0
               ? 'opacity-30 cursor-not-allowed text-stone-600'
-              : 'text-stone-300 hover:text-white hover:border-white/20 hover:scale-[1.03]'
+              : 'text-stone-300 hover:text-white hover:border-white/20 hover:scale-[1.03] cursor-pointer'
           }`}
         >
           <ChevronLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
@@ -172,8 +187,9 @@ export default function PoemViewer({
 
         {/* Center Timeline Quick Link */}
         <button
+          type="button"
           onClick={onOpenTimeline}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-full glass-card text-stone-400 hover:text-stone-200 transition-all duration-300 text-xs font-sans-ui tracking-widest uppercase hover:border-white/20"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-full glass-card text-stone-400 hover:text-stone-200 transition-all duration-300 text-xs font-sans-ui tracking-widest uppercase hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] cursor-pointer"
         >
           <Compass className="w-3.5 h-3.5 text-[#c5a059]" />
           <span>Stage {currentStage?.name}</span>
@@ -181,11 +197,9 @@ export default function PoemViewer({
 
         {/* Next Poem Button */}
         <button
-          onClick={() => {
-            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-            onNext();
-          }}
-          className="group flex items-center gap-3 px-6 py-3 rounded-full bg-[#f4f1ea] text-[#0a0a0c] font-sans-ui font-medium text-xs uppercase tracking-widest transition-all duration-300 hover:shadow-[0_0_25px_rgba(244,241,234,0.3)] hover:scale-[1.03] active:scale-[0.98]"
+          type="button"
+          onClick={handleNextClick}
+          className="group flex items-center gap-3 px-6 py-3 rounded-full bg-[#f4f1ea] text-[#0a0a0c] font-sans-ui font-medium text-xs uppercase tracking-widest transition-all duration-300 hover:shadow-[0_0_25px_rgba(244,241,234,0.3)] hover:scale-[1.03] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] cursor-pointer"
         >
           <span>{currentIndex === totalPoems - 1 ? 'Final Page' : 'Next Poem'}</span>
           <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />

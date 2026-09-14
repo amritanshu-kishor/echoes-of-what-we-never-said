@@ -2,6 +2,17 @@ import React, { useEffect, useRef } from 'react';
 
 export default function ParticleBackground({ mousePos, intensity = 1.0 }) {
   const canvasRef = useRef(null);
+  const mousePosRef = useRef(mousePos);
+  const intensityRef = useRef(intensity);
+
+  // Keep refs up to date without restarting animation loop
+  useEffect(() => {
+    mousePosRef.current = mousePos;
+  }, [mousePos]);
+
+  useEffect(() => {
+    intensityRef.current = intensity;
+  }, [intensity]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -39,9 +50,9 @@ export default function ParticleBackground({ mousePos, intensity = 1.0 }) {
     const render = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Mouse parallax smooth interpolation
-      const targetMouseX = mousePos?.x ?? width / 2;
-      const targetMouseY = mousePos?.y ?? height / 2;
+      const latestMouse = mousePosRef.current;
+      const targetMouseX = latestMouse?.x ?? width / 2;
+      const targetMouseY = latestMouse?.y ?? height / 2;
       currentMouseX += (targetMouseX - currentMouseX) * 0.04;
       currentMouseY += (targetMouseY - currentMouseY) * 0.04;
 
@@ -65,6 +76,7 @@ export default function ParticleBackground({ mousePos, intensity = 1.0 }) {
       ctx.fillRect(0, 0, width, height);
 
       // Render floating particles
+      const currentIntensity = intensityRef.current ?? 1.0;
       particles.forEach((p) => {
         p.x += p.speedX;
         p.y += p.speedY;
@@ -76,7 +88,7 @@ export default function ParticleBackground({ mousePos, intensity = 1.0 }) {
         if (p.y < 0) p.y = height;
         if (p.y > height) p.y = 0;
 
-        const currentAlpha = (Math.sin(p.pulse) * 0.2 + 0.3) * p.alpha * intensity;
+        const currentAlpha = (Math.sin(p.pulse) * 0.2 + 0.3) * p.alpha * currentIntensity;
         const renderX = p.x + parallaxX * (p.radius * 0.8);
         const renderY = p.y + parallaxY * (p.radius * 0.8);
 
@@ -106,7 +118,7 @@ export default function ParticleBackground({ mousePos, intensity = 1.0 }) {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [mousePos, intensity]);
+  }, []); // Run effect once on mount
 
   return (
     <canvas

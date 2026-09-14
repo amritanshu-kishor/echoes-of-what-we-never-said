@@ -1,8 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, RotateCcw, Compass } from 'lucide-react';
+import { resetScroll } from '../utils/scroll';
 
 export default function FinalScreen({ onRestart, onOpenHiddenStory, onOpenTimeline }) {
+  const handleRestartClick = () => {
+    resetScroll();
+    onRestart();
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -23,7 +29,7 @@ export default function FinalScreen({ onRestart, onOpenHiddenStory, onOpenTimeli
         transition={{ duration: 2, delay: 0.5 }}
         className="text-xs uppercase tracking-[0.35em] text-stone-500 font-sans-ui"
       >
-        Poem XXI &bull; Completion
+        Poem XX &bull; Completion
       </motion.div>
 
       {/* Main Closing Text */}
@@ -61,24 +67,27 @@ export default function FinalScreen({ onRestart, onOpenHiddenStory, onOpenTimeli
           className="flex flex-col sm:flex-row items-center gap-4"
         >
           <button
+            type="button"
             onClick={onOpenHiddenStory}
-            className="group px-8 py-4 rounded-full bg-[#c5a059] text-[#0a0a0c] font-sans-ui font-medium text-xs uppercase tracking-widest transition-all duration-300 hover:shadow-[0_0_35px_rgba(197,160,89,0.5)] hover:scale-[1.03] flex items-center gap-3"
+            className="group px-8 py-4 rounded-full bg-[#c5a059] text-[#0a0a0c] font-sans-ui font-medium text-xs uppercase tracking-widest transition-all duration-300 hover:shadow-[0_0_35px_rgba(197,160,89,0.5)] hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] cursor-pointer flex items-center gap-3"
           >
             <Sparkles className="w-4 h-4 text-[#0a0a0c]" />
             <span>Read The Hidden Story</span>
           </button>
 
           <button
+            type="button"
             onClick={onOpenTimeline}
-            className="px-6 py-4 rounded-full glass-card text-stone-300 hover:text-white font-sans-ui text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2.5 hover:border-white/20"
+            className="px-6 py-4 rounded-full glass-card text-stone-300 hover:text-white font-sans-ui text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2.5 hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] cursor-pointer"
           >
             <Compass className="w-4 h-4 text-[#c5a059]" />
             <span>The Journey Map</span>
           </button>
 
           <button
-            onClick={onRestart}
-            className="px-6 py-4 rounded-full glass-panel text-stone-400 hover:text-white font-sans-ui text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2 border-white/10 hover:border-white/20"
+            type="button"
+            onClick={handleRestartClick}
+            className="px-6 py-4 rounded-full glass-panel text-stone-400 hover:text-white font-sans-ui text-xs uppercase tracking-widest transition-all duration-300 flex items-center gap-2 border-white/10 hover:border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c5a059] cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Restart Journey</span>
